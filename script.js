@@ -28,32 +28,65 @@ var axisY = d3.svg.axis()
     .tickSize(width)
     .scale(scaleY);
 
-//Draw axes
-plot.append('g').attr('class','axis axis-x')
-    .attr('transform','translate(0,'+height+')')
-    .call(axisX);
-plot.append('g').attr('class','axis axis-y')
-    .call(axisY);
-
 //Start importing data
-d3.csv('/data/world_bank_2012.csv', parse, dataLoaded);
+d3.csv('/data/fao_combined_world_1963_2013.csv', parse, dataLoaded); //load fao data (replaced world bank file)
 
 function parse(d){
 
-    //Eliminate records for which gdp per capita isn't available
+    //console.log("data array " + d); //contains 102 objects with many rows each
 
-    //Check "primary completion" and "urban population" columns
-    //if figure is unavailable and denoted as "..", replace it with undefined
-    //otherwise, parse the figure into numbers
-    return {
-
-    };
+    //return only the information relevant to this exercise;
+    return { item: d.ItemName, //note that names are capitalized to match array handles - not in standard camel case!
+             year: d.Year,
+             value: d.Value
+    }
 
 
 
 }
 
 function dataLoaded(error, rows){
+
+    var nestedData = d3.nest()
+        .key(function(d) {return d.item})//grab the data by the item name (coffee,tea) from the big array + return as a nested object
+        .entries(rows);  //big array of elements
+
+    console.log(nestedData); //output to console to check - 2 51-item arrays, one with key = Tea, one Coffee. Objects retain properties above.
+
+    var lineGenerator = d3.svg.line()
+        .x(function(d){return scaleX(d.year)})
+        .y(function(d){return scaleY(d.value)})
+        .interpolate('basis');
+
+    var timeSeries = plot.selectAll('coffee-data-line tea-data-line') //yields a selection of 0 <path> elements
+        .data(nestedData) //joins to an array of two objects
+        .enter()
+        .append('path') //creates two new <path> elements as the enter set
+        .attr('class', function(d){
+
+            if(d.key=='Coffee, green'){
+                return 'coffee-data-line'
+            }
+            else if (d.key=='Tea'){
+                return 'tea-data-line'
+            }
+
+        }) //each element will have class of either "coffee-data-line" or "tea-data-line"
+
+        .attr('d', function(d){
+            console.log(d);
+            return lineGenerator(d.values)
+        });
+
+    //Draw axes
+    plot.append('g').attr('class','axis axis-x')
+        .attr('transform','translate(0,'+height+')')
+        .call(axisX);
+    plot.append('g').attr('class','axis axis-y')
+        .call(axisY);
+
+
+
 
 }
 
