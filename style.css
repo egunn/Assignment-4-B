@@ -30,11 +30,13 @@ html,body{
 /*-----------tooltip-----------*/
 .canvas .custom-tooltip{
     position:absolute;
-    border:1px solid red;
+    border:1px solid lightgray;
     width:150px;
     min-height:10px;
     padding:0px 10px;
 }
+/*    .coffee-tooltip{ border:1px solid red;}
+    .tea-tooltip{ border:1px solid rgb(0,200,255);}*/
 
 /*------------font-------------*/
 body{
@@ -57,13 +59,14 @@ p{ font-size: .9em;}
     fill:rgb(80,80,80)
 }
 
+
 .data-point{
     fill:white;
     stroke-width:2px;
     stroke:rgb(150,150,150);
 }
-    .coffee-data-point{ stroke:red; }
-    .tea-data-point{ stroke:rgb(0,200,255); }
+    .coffee-data-point{ stroke:red; opacity:0; }
+    .tea-data-point{ stroke:rgb(0,200,255); opacity:0;}
 .data-line{
     fill:none;
     stroke-width:2px;

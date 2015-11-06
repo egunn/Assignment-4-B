@@ -47,6 +47,14 @@ function parse(d){
 
 function dataLoaded(error, rows){
 
+    //when data is done loading, pass it to the draw function (do plotting in draw to allow recurring mouse functions -
+    //dataLoaded only runs once
+    draw(rows);
+
+}
+
+function draw(rows) {
+
     var nestedData = d3.nest()
         .key(function(d) {return d.item})//grab the data by the item name (coffee,tea) from the big array + return as a nested object
         .entries(rows);  //big array of elements
@@ -85,8 +93,67 @@ function dataLoaded(error, rows){
     plot.append('g').attr('class','axis axis-y')
         .call(axisY);
 
+    //draw data points for both curves, to use as objects for mouseenter
+    var teaDots = plot.selectAll('.tea-data-point')
+        .data(nestedData[0].values);
+    var teaDotsEnter = teaDots.enter()
+        .append('circle')
+        .attr('class','data-point tea-data-point')
+        .attr('cx', function(d){return scaleX(d.year);})
+        .attr('cy', function(d){return scaleY(d.value);})
+        .attr('r',10)
+        .call(attachTooltip);
 
+    var coffeeDots = plot.selectAll('.coffee-data-point')
+        .data(nestedData[1].values);
+    var coffeeDotsEnter = coffeeDots.enter()
+        .append('circle')
+        .attr('class','data-point coffee-data-point')
+        .attr('cx', function(d){return scaleX(d.year);})
+        .attr('cy', function(d){return scaleY(d.value);})
+        .attr('r',10)
+        .call(attachTooltip);
 
+    //var tooltip = d3.select('.custom-tooltip');
 
 }
 
+
+function attachTooltip(selection){
+    selection
+        .on('mouseenter',function(d){
+            var tooltip = d3.select('.custom-tooltip');
+            tooltip
+                .transition()
+                .style('opacity',1);
+                //tried making separate classes to set tooltip box color to match lines; something broke.
+                /*.attr('class', function(){
+                    if(d.key=='Coffee, green'){
+                        return 'coffee-tooltip'
+                    }
+                    else if (d.key=='Tea'){
+                        return 'tea-tooltip'
+                    }
+                });
+                */
+
+
+        })
+        .on('mousemove',function(d){
+            var xy = d3.mouse(canvas.node());
+            //console.log(xy);
+
+            var tooltip = d3.select('.custom-tooltip');
+
+            tooltip
+                .style('left',xy[0]+50+'px')
+                .style('top',(xy[1]+50)+'px')
+                .html(d.value);
+
+        })
+        .on('mouseleave',function(){
+            var tooltip = d3.select('.custom-tooltip')
+                .transition()
+                .style('opacity',0);
+        })
+}
